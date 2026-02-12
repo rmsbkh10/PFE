@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { assessmentAPI } from '../services/api';
+import { assessmentAPI } from '../../services/api';
 import './AssessmentPage.css';
 
 const AssessmentPage = () => {

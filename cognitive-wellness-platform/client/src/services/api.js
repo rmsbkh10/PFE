@@ -1,50 +1,35 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import './Navbar.css';
+import axios from "axios";
 
-const Navbar = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+const API = axios.create({
+  baseURL: "http://localhost:5000/api",
+});
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+// Ajouter le token automatiquement à chaque requête
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-  return (
-    <nav className="navbar">
-      <div className="navbar-container">
-        <Link to="/" className="navbar-brand">
-          <span className="brand-icon">🧠</span>
-          <span className="brand-text">CogniWell</span>
-        </Link>
-
-        <div className="navbar-links">
-          {user ? (
-            <>
-              <Link to="/assessment" className="nav-link">
-                📝 Nouveau Test
-              </Link>
-              <Link to="/dashboard" className="nav-link">
-                📊 Tableau de bord
-              </Link>
-              <div className="nav-user">
-                <span className="user-greeting">Bonjour, {user.name}</span>
-                <button onClick={handleLogout} className="btn-logout">
-                  Déconnexion
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <Link to="/login" className="nav-link">Connexion</Link>
-              <Link to="/register" className="btn-register">S'inscrire</Link>
-            </>
-          )}
-        </div>
-      </div>
-    </nav>
-  );
+// ===== AUTH API =====
+export const authAPI = {
+  login: (data) => API.post("/auth/login", data),
+  register: (data) => API.post("/auth/register", data),
+  getMe: () => API.get("/auth/me"),
 };
 
-export default Navbar;
+// ===== ASSESSMENT API =====
+export const assessmentAPI = {
+  submit: (data) => API.post("/assessment/submit", data),
+  getHistory: () => API.get("/assessment/history"),
+  getById: (id) => API.get(`/assessment/${id}`),
+};
+
+// ===== RECOMMENDATIONS API =====
+export const recommendationsAPI = {
+  get: (assessmentId) => API.get(`/recommendations/${assessmentId}`),
+};
+
+export default API;
